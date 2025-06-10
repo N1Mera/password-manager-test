@@ -9,24 +9,12 @@ html
 <body>
 	<h1>アカウント登録</h1>
 	<h2>ログインIDを入力してください</h2>
-	<form action="/password-manager-test/step2.html" method="GET" autocomplete="on">
+	<form action="/password-manager-test/step2.html" method="GET">
 		<div>
-			<label for="username">ユーザーID:</label>
+			<label for="username">ログインID:</label>
 			<input type="text" id="username" name="username" autocomplete="username" required>
 		</div>
 		<button type="submit">次へ</button>
 	</form>
-
-	<script>
-		document.getElementById('form1').addEventListener('submit', function(event){
-			event.preventDefault();
-			const username = this.username.value.trim();
-			if(username){
-				window.location.href = 'step2.html?username=${encodeURIComponent(username)}';
-			} else {
-				alert('ログインIDを入力してください');
-			}
-		});
-	</script>
 </body>
 </html>
