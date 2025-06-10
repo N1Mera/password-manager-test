@@ -4,13 +4,13 @@ html
 <html lang="ja">
 <head>
 	<meta charset="UTF-8">
-	<title>ログインID入力</title>
+	<title>Step1: ログインID入力</title>
 </head>
 <body>
 	<h1>ログインIDを入力してください</h1>
-	<form action="/step2" method="POST">
+	<form action="step2.html" method="GET" autocomplete="on">
 		<label for="username">ユーザーID:</label>
-		<input type="text" id="username" name="username" autocomplete="username">
+		<input type="text" id="username" name="username" autocomplete="username" required />
 		<button type="submit">次へ</button>
 	</form>
 </body>
