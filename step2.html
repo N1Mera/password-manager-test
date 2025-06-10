@@ -4,31 +4,38 @@ html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Step2: パスワード入力</title>
 </head>
 <body>
   <h1>アカウント登録</h1>
   <h2>パスワードを入力してください</h2>
-  <form id="form2" action="success.html" method="GET" autocomplete="on">
-    <input type="hidden" name="username" id="hidden-username" />
-    
-    <label for="password">パスワード:</label>
-    <input type="password" id="password" name="new-password" autocomplete="new-password" required />
+  
+  <form action="success.html" method="GET">
+    <input type="hidden" name="username" id="hidden-username" autocomplete="username">
+
+    <div>
+      <label for="password">パスワード:</label>
+      <input type="password" id="password" name="password" autocomplete="new-password" required>
+    </div>
     
     <button type="submit">次へ</button>
   </form>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const username = params.get('username');
-    if (username) {
-      document.getElementById('hidden-username').value = username;
-      const info = document.createElement('p');
-      info.textContext = 'ログインID: ${username}';
-      document.body.insertBefore(info, document.getElementById('form2'));
-    }
-
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      const username = urlParams.get('username');
+      
+      if (username) {
+        const hiddenUsernameField = document.getElementById('hidden-username');
+        hiddenUsernameField.value = username;
+      } else {
+        const displayUsernameElement = document.getElementById('display-username');
+        displayUsernameElement.textContent = 'IDが取得できませんでした。';
+      }
+    });
   </script>
 </body>
 </html>
