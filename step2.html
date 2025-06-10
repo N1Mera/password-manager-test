@@ -8,10 +8,29 @@ html
 </head>
 <body>
   <h1>パスワードを入力してください</h1>
-  <form action="#" method="POST" autocomplete="on">
+  <form id="form2" action="#" method="POST" autocomplete="on">
+    <input type="hidden" name="username" id="hidden-username" />
+    
     <label for="password">パスワード:</label>
     <input type="password" id="password" name="password" autocomplete="current-password" required />
+    
     <button type="submit">ログイン</button>
   </form>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username');
+    if (username) {
+      document.getElementById('hidden-username').value = username;
+      const info = document.createElement('p');
+      info.textContext = 'ログインID: ${username}';
+      document.body.insertBefore(info, document.getElementById('form2'));
+    }
+
+    document.getElementById('form2').addEventListener('submit', function(event){
+      event.preventDefault();
+      alert('パスワードマネージャーの保存が出たか確認してください');
+    });
+  </script>
 </body>
 </html>
