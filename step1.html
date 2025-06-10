@@ -13,5 +13,17 @@ html
 		<input type="text" id="username" name="username" autocomplete="username" required />
 		<button type="submit">次へ</button>
 	</form>
+
+	<script>
+		document.getElementById('form1').addEventListener('submit', function(event){
+			event.preventDefault();
+			const username = this.username.value.trim();
+			if(username){
+				window.location.href = 'step2.html?username=${encodeURIComponent(username)}';
+			} else {
+				alert('ログインIDを入力してください');
+			}
+		});
+	</script>
 </body>
 </html>
