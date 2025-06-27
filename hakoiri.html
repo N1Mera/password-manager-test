@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（表示修正最終版）</title>
+  <title>箱入り娘（玄関2マス・仕切り修正）</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin: 0; }
     #board {
       position: relative;
       display: grid;
       grid-template-columns: repeat(6, 50px);
-      grid-template-rows: repeat(7, 50px); /* ← 8→7行に */
+      grid-template-rows: repeat(6, 50px); /* 6段に縮小 */
       gap: 1px;
       margin: 10px auto;
       background-color: #ccc;
       touch-action: none;
-      width: 301px; /* 6×50 + 5×1px gap = 300 + 5 = 305 */
-      height: 352px; /* 7×50 + 6×1px gap = 350 + 6 = 356 */
+      width: 301px; /* 6列 * 50px + gap = 300 + 5 */
+      height: 301px; /* 6段 * 50px + gap = 300 + 5 */
     }
     .piece {
       background: #fce5cd;
@@ -34,7 +34,7 @@
     .玄関 {
       background: #d9ead3;
       grid-column: 1 / span 6;
-      grid-row: 7 / span 1;
+      grid-row: 5 / span 2; /* y=5,6を玄関に */
       z-index: 1;
       font-size: 13px;
       display: flex;
@@ -62,13 +62,13 @@
   </style>
 </head>
 <body>
-  <h1>箱入り娘（表示調整済）</h1>
+  <h1>箱入り娘（玄関2マス対応）</h1>
   <div id="board"></div>
   <div id="goal"></div>
   <button id="resetBtn" onclick="resetGame()">もう一度やり直す</button>
 
   <script>
-    const boardWidth = 6, boardHeight = 7;
+    const boardWidth = 6, boardHeight = 6;
     let touchStartX = 0, touchStartY = 0;
     let pieces, initialPieces;
 
@@ -94,17 +94,19 @@
     function drawBoard() {
       board.innerHTML = "";
 
+      // 玄関ゾーン
       const genkan = document.createElement("div");
       genkan.className = "玄関";
       genkan.textContent = "玄関";
       board.appendChild(genkan);
 
+      // 玄関の仕切り線（y=4と5の間）
       const barrierXs = [0, 1, 4, 5];
       for (const x of barrierXs) {
         const line = document.createElement("div");
         line.className = "barrier";
         line.style.left = `${x * 50}px`;
-        line.style.top = `${6 * 50}px`;
+        line.style.top = `${5 * 50}px`;
         line.style.width = "50px";
         board.appendChild(line);
       }
@@ -152,7 +154,7 @@
           const nx = p.x + i + dx;
           const ny = p.y + j + dy;
 
-          if (dy > 0 && ny === 6 && !(p.x + i === 2 || p.x + i === 3)) {
+          if (dy > 0 && ny === 5 && !(p.x + i === 2 || p.x + i === 3)) {
             return;
           }
           if (nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight ||
@@ -165,11 +167,11 @@
       p.x += dx;
       p.y += dy;
       drawBoard();
-      setTimeout(checkWinOrViolation, 10); // 描画後にチェック
+      setTimeout(checkWinOrViolation, 10); // 描画反映後に検査
     }
 
     function checkWinOrViolation() {
-      const yThreshold = 6;
+      const yThreshold = 5;
       for (const p of pieces) {
         if (p.y + p.h - 1 >= yThreshold && p.id !== "娘") {
           goal.textContent = "🚫 ルール違反：娘以外が玄関に入りました。";
@@ -196,7 +198,6 @@
 
     // 初期化
     pieces = initPieces();
-    initialPieces = initPieces();
     drawBoard();
   </script>
 </body>
