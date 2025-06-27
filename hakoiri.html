@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（玄関表示修正済＋移動バグ修正）</title>
+  <title>箱入り娘（ID修正済）</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin: 0; }
     #board {
@@ -62,7 +62,7 @@
   </style>
 </head>
 <body>
-  <h1>箱入り娘（玄関表示修正済＋移動バグ修正）</h1>
+  <h1>箱入り娘（ID重複修正済）</h1>
   <div id="board"></div>
   <div id="goal"></div>
   <button id="resetBtn" onclick="resetGame()">もう一度やり直す</button>
@@ -74,20 +74,20 @@
 
     function initPieces() {
       return JSON.parse(JSON.stringify([
-        { id: "父",     x: 1, y: 0, w: 1, h: 2 },
-        { id: "母",     x: 4, y: 0, w: 1, h: 2 },
-        { id: "娘",     x: 2, y: 0, w: 2, h: 2 },
+        { id: "父", x: 1, y: 0, w: 1, h: 2 },
+        { id: "母", x: 4, y: 0, w: 1, h: 2 },
+        { id: "娘", x: 2, y: 0, w: 2, h: 2 },
         { id: "大番頭", x: 1, y: 2, w: 4, h: 1 },
-        { id: "番頭",   x: 1, y: 3, w: 2, h: 1 },
-        { id: "女中",   x: 3, y: 3, w: 2, h: 1 },
-        { id: "祖父",   x: 1, y: 4, w: 2, h: 1 },
-        { id: "祖母",   x: 3, y: 4, w: 2, h: 1 },
-        { id: "手代",   x: 0, y: 2, w: 1, h: 1 },
-        { id: "丁稚",   x: 0, y: 3, w: 1, h: 1 },
-        { id: "丁稚",   x: 5, y: 3, w: 1, h: 1 },
-        { id: "兄嫁",   x: 5, y: 2, w: 1, h: 1 },
-        { id: "番犬",   x: 5, y: 4, w: 1, h: 1 },
-        { id: "丁稚",   x: 0, y: 4, w: 1, h: 1 }
+        { id: "番頭", x: 1, y: 3, w: 2, h: 1 },
+        { id: "女中", x: 3, y: 3, w: 2, h: 1 },
+        { id: "祖父", x: 1, y: 4, w: 2, h: 1 },
+        { id: "祖母", x: 3, y: 4, w: 2, h: 1 },
+        { id: "手代", x: 0, y: 2, w: 1, h: 1 },
+        { id: "丁稚1", label: "丁稚", x: 0, y: 3, w: 1, h: 1 },
+        { id: "丁稚2", label: "丁稚", x: 5, y: 3, w: 1, h: 1 },
+        { id: "兄嫁", x: 5, y: 2, w: 1, h: 1 },
+        { id: "番犬", x: 5, y: 4, w: 1, h: 1 },
+        { id: "丁稚3", label: "丁稚", x: 0, y: 4, w: 1, h: 1 }
       ]));
     }
 
@@ -112,7 +112,7 @@
       for (const p of pieces) {
         const div = document.createElement("div");
         div.className = "piece";
-        div.textContent = p.id;
+        div.textContent = p.label || p.id;
         div.style.gridColumn = `${p.x + 1} / span ${p.w}`;
         div.style.gridRow = `${p.y + 1} / span ${p.h}`;
         div.dataset.id = p.id;
@@ -152,7 +152,6 @@
           const nx = p.x + i + dx;
           const ny = p.y + j + dy;
 
-          // 玄関に入れるのは娘だけ（x=2または3）
           if (dy > 0) {
             if (ny === 5 && !(p.x + i === 2 || p.x + i === 3)) return;
           }
