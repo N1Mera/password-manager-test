@@ -3,66 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（ID修正済）</title>
+  <title>箱入り娘 - 和風改良版</title>
   <style>
-    body { font-family: sans-serif; text-align: center; margin: 0; }
-    #board {
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(6, 50px);
-      grid-template-rows: repeat(7, 50px);
-      gap: 1px;
-      margin: 10px auto;
-      background-color: #ccc;
-      touch-action: none;
-      width: 301px;
-      height: 352px;
+    body {
+      margin: 0;
+      font-family: "Yu Mincho", "serif";
+      background-color: #f8f4e6;
+      text-align: center;
     }
+
+    h1 {
+      margin: 10px 0;
+      font-size: 5vw;
+      color: #4b382a;
+      font-weight: bold;
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      aspect-ratio: 6 / 7;
+      max-width: 90vmin;
+      margin: 0 auto;
+      gap: 0.5vmin;
+      position: relative;
+      background: #a67c52;
+      padding: 0.5vmin;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      touch-action: none;
+    }
+
     .piece {
-      background: #fce5cd;
-      border: 2px solid #555;
-      border-radius: 6px;
+      background: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+      background-color: #deb887;
+      border: 2px solid #5c4320;
+      border-radius: 12%;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 13px;
+      font-size: 3vmin;
+      color: #2c1a00;
+      font-family: 'Noto Serif JP', 'serif';
+      font-weight: bold;
       user-select: none;
       touch-action: none;
-      transition: all 0.2s ease;
-      z-index: 2;
+      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2), inset 2px 2px 4px rgba(255,255,255,0.4);
     }
+
     .玄関 {
-      background: #d9ead3;
       grid-column: 1 / span 6;
       grid-row: 6 / span 2;
-      z-index: 1;
-      font-size: 13px;
+      background: repeating-linear-gradient(
+        45deg,
+        #d8c9a3,
+        #d8c9a3 10px,
+        #c2b280 10px,
+        #c2b280 20px
+      );
+      color: #4b382a;
+      font-size: 2.8vmin;
+      font-family: 'Noto Serif JP', serif;
+      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 8px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
     }
+
     .barrier {
       position: absolute;
       height: 2px;
-      background-color: #999;
+      background-color: #666;
       z-index: 3;
     }
+
     #goal {
-      margin: 10px 0;
+      margin: 1rem;
       font-weight: bold;
+      font-size: 4vw;
+      color: #b53a3a;
     }
+
     #resetBtn {
       display: none;
-      padding: 6px 12px;
-      font-size: 14px;
-      background: #f4cccc;
-      border: 1px solid #999;
-      border-radius: 4px;
+      padding: 0.5em 1em;
+      font-size: 1.2rem;
+      background: #f2e8dc;
+      border: 2px solid #8c6f5a;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    #resetBtn:hover {
+      background-color: #e8d8c0;
     }
   </style>
 </head>
 <body>
-  <h1>箱入り娘（ID重複修正済）</h1>
+  <h1>箱入り娘</h1>
   <div id="board"></div>
   <div id="goal"></div>
   <button id="resetBtn" onclick="resetGame()">もう一度やり直す</button>
@@ -103,9 +146,10 @@
       for (const x of barrierXs) {
         const line = document.createElement("div");
         line.className = "barrier";
-        line.style.left = `${x * 50}px`;
-        line.style.top = `${5 * 50}px`;
-        line.style.width = "50px";
+        line.style.left = `${(x / boardWidth) * 100}%`;
+        line.style.top = `${(5 / boardHeight) * 100}%`;
+        line.style.width = `${(1 / boardWidth) * 100}%`;
+        line.style.height = "2px";
         board.appendChild(line);
       }
 
