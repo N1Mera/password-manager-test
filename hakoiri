@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>娘を玄関へ</title>
+  <style>
+    body { font-family: sans-serif; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(6, 60px);
+      grid-template-rows: repeat(8, 60px);
+      gap: 2px;
+      margin: 20px auto;
+      width: fit-content;
+    }
+    .cell {
+      width: 60px;
+      height: 60px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #999;
+      box-sizing: border-box;
+    }
+    .block {
+      background: #ccc;
+      border: 2px solid #333;
+      cursor: move;
+      font-weight: bold;
+    }
+    #message {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="board" id="board"></div>
+  <div id="message"></div>
+
+  <script>
+    const board = document.getElementById("board");
+    const cells = [];
+    const width = 6, height = 8;
+
+    // 初期化
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const div = document.createElement("div");
+        div.className = "cell";
+        div.dataset.x = x;
+        div.dataset.y = y;
+        board.appendChild(div);
+        cells.push(div);
+      }
+    }
+
+    // ブロック定義
+    const blocks = {
+      "父": { pos: [[1, 2], [2, 2]] },
+      "娘": { pos: [[1, 3], [2, 3], [1, 4], [2, 4]] },
+      "母": { pos: [[1, 5], [2, 5]] },
+      "手代": { pos: [[0, 3]] },
+      "大番頭": { pos: [[1, 5], [2, 5], [3, 5], [4, 5]] },
+      "兄弟": { pos: [[5, 5]] },
+      "丁稚1": { pos: [[0, 4]] },
+      "番頭": { pos: [[1, 4], [2, 4]] },
+      "女中": { pos: [[3, 4], [4, 4]] },
+      "丁稚2": { pos: [[5, 4]] },
+      "丁稚3": { pos: [[0, 5]] },
+      "祖父": { pos: [[1, 6], [2, 6]] },
+      "祖母": { pos: [[3, 6], [4, 6]] },
+      "番犬": { pos: [[5, 6], [5, 7]] },
+    };
+
+    // 玄関領域
+    function isGoal(x, y) {
+      return (y >= 6 && (x === 4 || x === 5));
+    }
+
+    // ブロック配置
+    const positions = {};
+    for (const [name, data] of Object.entries(blocks)) {
+      const div = document.createElement("div");
+      div.className = "block";
+      div.innerText = name;
+      div.style.position = "absolute";
+      div.dataset.name = name;
+      board.appendChild(div);
+      data.el = div;
+      updateBlockPosition(name);
+
+      div.draggable = true;
+      div.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", name);
+      });
+    }
+
+    board.addEventListener("dragover", e => e.preventDefault());
+    board.addEventListener("drop", e => {
+      const name = e.dataTransfer.getData("text/plain");
+      const block = blocks[name];
+      const rect = board.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / 62);
+      const y = Math.floor((e.clientY - rect.top) / 62);
+      const dx = x - block.pos[0][0];
+      const dy = y - block.pos[0][1];
+      const newPos = block.pos.map(([px, py]) => [px + dx, py + dy]);
+
+      if (newPos.every(([nx, ny]) =>
+        nx >= 0 && nx < width && ny >= 0 && ny < height &&
+        !Object.values(blocks).some(b => b !== block && b.pos.some(([bx, by]) => bx === nx && by === ny))
+      )) {
+        block.pos = newPos;
+        updateBlockPosition(name);
+        checkGoal();
+      }
+    });
+
+    function updateBlockPosition(name) {
+      const block = blocks[name];
+      const [x0, y0] = block.pos[0];
+      const x1 = Math.max(...block.pos.map(p => p[0]));
+      const y1 = Math.max(...block.pos.map(p => p[1]));
+      block.el.style.left = `${x0 * 62}px`;
+      block.el.style.top = `${y0 * 62}px`;
+      block.el.style.width = `${(x1 - x0 + 1) * 60 + (x1 - x0) * 2}px`;
+      block.el.style.height = `${(y1 - y0 + 1) * 60 + (y1 - y0) * 2}px`;
+    }
+
+    function checkGoal() {
+      const daughter = blocks["娘"];
+      if (daughter.pos.some(([x, y]) => isGoal(x, y))) {
+        document.getElementById("message").innerText = "クリア！娘が玄関に到達しました。";
+      }
+    }
+  </script>
+</body>
+</html>
