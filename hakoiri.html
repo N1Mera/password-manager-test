@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（6×8・玄関付き）</title>
+  <title>箱入り娘（玄関ルール強化）</title>
   <style>
     body { font-family: sans-serif; text-align: center; }
-    h1 { font-size: 1.2em; }
     #board {
       display: grid;
       grid-template-columns: repeat(6, 50px);
@@ -36,45 +35,46 @@
       grid-row: 7 / span 2;
       z-index: 1;
       border-top: 2px dashed #666;
-      font-size: 12px;
+      font-size: 13px;
       text-align: center;
-      padding-top: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #goal {
       margin-top: 10px;
-      color: green;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>箱入り娘（6×8・玄関付き）</h1>
+  <h1>箱入り娘（6×8・玄関ルール強化）</h1>
   <div id="board"></div>
   <div id="goal"></div>
 
   <script>
-    const boardWidth = 6;
-    const boardHeight = 8;
+    const boardWidth = 6, boardHeight = 8;
     let touchStartX = 0, touchStartY = 0;
+    let pieces, initialPieces;
 
-    const pieces = [
-      { id: "父",     x: 1, y: 0, w: 1, h: 2 },
-      { id: "母",     x: 4, y: 0, w: 1, h: 2 },
-      { id: "娘",     x: 2, y: 0, w: 2, h: 2 },
-      { id: "大番頭", x: 1, y: 2, w: 4, h: 1 }, // 横長に変更
-      { id: "番頭",   x: 1, y: 3, w: 2, h: 1 },
-      { id: "女中",   x: 3, y: 3, w: 2, h: 1 },
-      { id: "祖父",   x: 1, y: 4, w: 2, h: 1 },
-      { id: "祖母",   x: 3, y: 4, w: 2, h: 1 },
-      { id: "手代",   x: 0, y: 2, w: 1, h: 1 },
-      { id: "丁稚",   x: 0, y: 3, w: 1, h: 1 },
-      { id: "丁稚",   x: 5, y: 3, w: 1, h: 1 },
-      { id: "兄嫁",   x: 5, y: 2, w: 1, h: 1 },
-      { id: "番犬",   x: 5, y: 4, w: 1, h: 1 },
-      { id: "丁稚",   x: 0, y: 4, w: 1, h: 1 }
-    ];
-
-    const board = document.getElementById("board");
-    const goal = document.getElementById("goal");
+    function initPieces() {
+      return JSON.parse(JSON.stringify([
+        { id: "父",     x: 1, y: 0, w: 1, h: 2 },
+        { id: "母",     x: 4, y: 0, w: 1, h: 2 },
+        { id: "娘",     x: 2, y: 0, w: 2, h: 2 },
+        { id: "大番頭", x: 1, y: 2, w: 4, h: 1 },
+        { id: "番頭",   x: 1, y: 3, w: 2, h: 1 },
+        { id: "女中",   x: 3, y: 3, w: 2, h: 1 },
+        { id: "祖父",   x: 1, y: 4, w: 2, h: 1 },
+        { id: "祖母",   x: 3, y: 4, w: 2, h: 1 },
+        { id: "手代",   x: 0, y: 2, w: 1, h: 1 },
+        { id: "丁稚",   x: 0, y: 3, w: 1, h: 1 },
+        { id: "丁稚",   x: 5, y: 3, w: 1, h: 1 },
+        { id: "兄嫁",   x: 5, y: 2, w: 1, h: 1 },
+        { id: "番犬",   x: 5, y: 4, w: 1, h: 1 },
+        { id: "丁稚",   x: 0, y: 4, w: 1, h: 1 }
+      ]));
+    }
 
     function drawBoard() {
       board.innerHTML = "";
@@ -82,7 +82,7 @@
       // 玄関ゾーン
       const genkan = document.createElement("div");
       genkan.className = "玄関";
-      genkan.textContent = "⬇️ ここが玄関です（娘をここに）";
+      genkan.textContent = "玄関";
       board.appendChild(genkan);
 
       for (const p of pieces) {
@@ -127,7 +127,18 @@
         for (let j = 0; j < p.h; j++) {
           const nx = p.x + i + dx;
           const ny = p.y + j + dy;
-          if (nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight || isOccupied(nx, ny, p.id)) {
+
+          // 🔒 仕切り制限：玄関に入れるのはx=2,3のみ
+          if (
+            dy > 0 && ny === 6 && !(p.x + i === 2 || p.x + i === 3)
+          ) {
+            return; // 中央以外から玄関に入ろうとした → 禁止
+          }
+
+          if (
+            nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight ||
+            isOccupied(nx, ny, p.id)
+          ) {
             return;
           }
         }
@@ -136,18 +147,31 @@
       p.x += dx;
       p.y += dy;
       drawBoard();
-      checkWin();
+      checkWinOrViolation();
     }
 
-    function checkWin() {
+    function checkWinOrViolation() {
+      const yThreshold = 6;
+      for (const p of pieces) {
+        if (p.y + p.h - 1 >= yThreshold && p.id !== "娘") {
+          goal.textContent = "🚫 ルール違反：玄関に娘以外が侵入しました。初期状態に戻します。";
+          pieces = initPieces();
+          drawBoard();
+          return;
+        }
+      }
+
       const musume = pieces.find(p => p.id === "娘");
-      if (musume.y >= 6) {
+      if (musume.y >= yThreshold) {
         goal.textContent = "🎉 娘が玄関に到達しました！";
       } else {
         goal.textContent = "";
       }
     }
 
+    // 初期化
+    pieces = initPieces();
+    initialPieces = initPieces();
     drawBoard();
   </script>
 </body>
