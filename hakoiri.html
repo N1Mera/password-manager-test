@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（玄関表示修正済）</title>
+  <title>箱入り娘（玄関表示修正済＋移動バグ修正）</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin: 0; }
     #board {
       position: relative;
       display: grid;
       grid-template-columns: repeat(6, 50px);
-      grid-template-rows: repeat(7, 50px); /* ← 7行に修正 */
+      grid-template-rows: repeat(7, 50px);
       gap: 1px;
       margin: 10px auto;
       background-color: #ccc;
       touch-action: none;
       width: 301px;
-      height: 352px; /* ← 7×50 + 6 gaps */
+      height: 352px;
     }
     .piece {
       background: #fce5cd;
@@ -34,7 +34,7 @@
     .玄関 {
       background: #d9ead3;
       grid-column: 1 / span 6;
-      grid-row: 6 / span 2; /* ← y=5,6 */
+      grid-row: 6 / span 2;
       z-index: 1;
       font-size: 13px;
       display: flex;
@@ -62,7 +62,7 @@
   </style>
 </head>
 <body>
-  <h1>箱入り娘（玄関表示修正済）</h1>
+  <h1>箱入り娘（玄関表示修正済＋移動バグ修正）</h1>
   <div id="board"></div>
   <div id="goal"></div>
   <button id="resetBtn" onclick="resetGame()">もう一度やり直す</button>
@@ -104,7 +104,7 @@
         const line = document.createElement("div");
         line.className = "barrier";
         line.style.left = `${x * 50}px`;
-        line.style.top = `${5 * 50}px`; // y=5の上
+        line.style.top = `${5 * 50}px`;
         line.style.width = "50px";
         board.appendChild(line);
       }
@@ -152,7 +152,11 @@
           const nx = p.x + i + dx;
           const ny = p.y + j + dy;
 
-          if (dy > 0 && ny === 5 && !(p.x + i === 2 || p.x + i === 3)) return;
+          // 玄関に入れるのは娘だけ（x=2または3）
+          if (dy > 0) {
+            if (ny === 5 && !(p.x + i === 2 || p.x + i === 3)) return;
+          }
+
           if (nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight || isOccupied(nx, ny, p.id)) return;
         }
       }
