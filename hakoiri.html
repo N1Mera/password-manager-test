@@ -1,31 +1,33 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>箱入り娘の大家族（スワイプ対応）</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>箱入り娘（6×8調整版）</title>
   <style>
-    body { text-align: center; font-family: sans-serif; }
+    body { font-family: sans-serif; text-align: center; }
     h1 { font-size: 1.2em; }
     #board {
       display: grid;
-      grid-template-columns: repeat(4, 80px);
-      grid-template-rows: repeat(5, 80px);
-      gap: 2px;
-      margin: 0 auto;
+      grid-template-columns: repeat(6, 50px);
+      grid-template-rows: repeat(8, 50px);
+      gap: 1px;
+      margin: 10px auto;
+      background-color: #ccc;
+      position: relative;
       touch-action: none;
     }
     .piece {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      background-color: #ffe4b5;
+      background: #fce5cd;
       border: 2px solid #555;
       border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 13px;
       user-select: none;
-      position: relative;
-      transition: 0.2s ease;
+      touch-action: none;
+      transition: all 0.2s ease;
     }
     #goal {
       margin-top: 10px;
@@ -34,28 +36,29 @@
   </style>
 </head>
 <body>
-  <h1>箱入り娘の大家族</h1>
+  <h1>箱入り娘（6×8）</h1>
   <div id="board"></div>
   <div id="goal"></div>
 
   <script>
-    const boardWidth = 4, boardHeight = 5;
+    const boardWidth = 6;
+    const boardHeight = 8;
     let touchStartX = 0, touchStartY = 0;
 
     const pieces = [
       { id: "父",      x: 0, y: 0, w: 1, h: 2 },
-      { id: "娘",      x: 1, y: 0, w: 2, h: 2 },
-      { id: "母",      x: 3, y: 0, w: 1, h: 2 },
-      { id: "番頭",    x: 0, y: 2, w: 1, h: 1 },
-      { id: "大番頭",  x: 1, y: 2, w: 2, h: 1 },
-      { id: "女中",    x: 2, y: 2, w: 1, h: 1 },
-      { id: "兄嫁",    x: 3, y: 2, w: 1, h: 1 },
-      { id: "手代",    x: 0, y: 3, w: 1, h: 1 },
-      { id: "祖父",    x: 1, y: 3, w: 1, h: 1 },
-      { id: "祖母",    x: 2, y: 3, w: 1, h: 1 },
-      { id: "番犬",    x: 3, y: 4, w: 1, h: 1 },
-      { id: "でっち1", x: 0, y: 4, w: 1, h: 1 },
-      { id: "でっち2", x: 1, y: 4, w: 1, h: 1 }
+      { id: "母",      x: 5, y: 0, w: 1, h: 2 },
+      { id: "娘",      x: 2, y: 0, w: 2, h: 2 },
+      { id: "大番頭",  x: 0, y: 2, w: 1, h: 4 },
+      { id: "番頭",    x: 1, y: 2, w: 2, h: 1 },
+      { id: "女中",    x: 3, y: 2, w: 2, h: 1 },
+      { id: "祖父",    x: 1, y: 3, w: 2, h: 1 },
+      { id: "祖母",    x: 3, y: 3, w: 2, h: 1 },
+      { id: "兄嫁",    x: 2, y: 4, w: 1, h: 1 },
+      { id: "手代",    x: 3, y: 4, w: 1, h: 1 },
+      { id: "でっち1", x: 4, y: 5, w: 1, h: 1 },
+      { id: "でっち2", x: 1, y: 5, w: 1, h: 1 },
+      { id: "番犬",    x: 2, y: 6, w: 1, h: 1 }
     ];
 
     const board = document.getElementById("board");
@@ -66,7 +69,7 @@
       for (const p of pieces) {
         const div = document.createElement("div");
         div.className = "piece";
-        div.textContent = p.id.replace(/\d/, '');
+        div.textContent = p.id;
         div.style.gridColumn = `${p.x + 1} / span ${p.w}`;
         div.style.gridRow = `${p.y + 1} / span ${p.h}`;
         div.dataset.id = p.id;
@@ -80,13 +83,8 @@
           const dx = e.changedTouches[0].clientX - touchStartX;
           const dy = e.changedTouches[0].clientY - touchStartY;
           const absX = Math.abs(dx), absY = Math.abs(dy);
-
-          if (Math.max(absX, absY) < 20) return; // スワイプ閾値
-
-          let dir = null;
-          if (absX > absY) dir = dx > 0 ? "right" : "left";
-          else            dir = dy > 0 ? "down" : "up";
-
+          if (Math.max(absX, absY) < 15) return;
+          let dir = absX > absY ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
           tryMove(p.id, dir);
         });
 
@@ -94,29 +92,23 @@
       }
     }
 
-    function isOccupied(x, y, ignoreId = null) {
+    function isOccupied(x, y, excludeId = null) {
       return pieces.some(p => {
-        if (p.id === ignoreId) return false;
-        return x >= p.x && x < p.x + p.w && y >= p.y && y < p.y + p.h;
+        if (p.id === excludeId) return false;
+        return x < p.x + p.w && x >= p.x && y < p.y + p.h && y >= p.y;
       });
     }
 
-    function tryMove(id, direction) {
+    function tryMove(id, dir) {
       const p = pieces.find(p => p.id === id);
-      let dx = 0, dy = 0;
-      if (direction === "up") dy = -1;
-      if (direction === "down") dy = 1;
-      if (direction === "left") dx = -1;
-      if (direction === "right") dx = 1;
+      const dx = dir === "right" ? 1 : dir === "left" ? -1 : 0;
+      const dy = dir === "down" ? 1 : dir === "up" ? -1 : 0;
 
       for (let i = 0; i < p.w; i++) {
         for (let j = 0; j < p.h; j++) {
           const nx = p.x + i + dx;
           const ny = p.y + j + dy;
-          if (
-            nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight ||
-            isOccupied(nx, ny, p.id)
-          ) {
+          if (nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight || isOccupied(nx, ny, p.id)) {
             return;
           }
         }
@@ -130,8 +122,8 @@
 
     function checkWin() {
       const musume = pieces.find(p => p.id === "娘");
-      if (musume.x === 1 && musume.y === 3) {
-        goal.textContent = "🎉 娘が玄関に出られました！";
+      if (musume.y === 6 && musume.x === 2) {
+        goal.textContent = "🎉 娘が玄関に出ました！";
       } else {
         goal.textContent = "";
       }
@@ -141,3 +133,4 @@
   </script>
 </body>
 </html>
+
