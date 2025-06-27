@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘 - 木箱風デザイン</title>
+  <title>箱入り娘 江戸絵巻</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: "Yu Mincho", "serif";
-      background-color: #f8f4e6;
+      font-family: 'Kiwi Maru', serif;
+      background: url('https://www.transparenttextures.com/patterns/groovepaper.png'), #f9f5ec;
       text-align: center;
     }
 
     h1 {
-      margin: 1rem 0;
-      font-size: 5vw;
-      color: #4b382a;
-      font-weight: bold;
+      font-size: 6vw;
+      margin: 1rem 0 0.5rem;
+      color: #3b2b1c;
+      text-shadow: 1px 1px 0 #fff;
     }
 
     #board {
@@ -26,48 +27,45 @@
       aspect-ratio: 6 / 7;
       max-width: 90vmin;
       margin: 0 auto;
-      gap: 0.5vmin;
       padding: 1vmin;
-      background: url('https://www.transparenttextures.com/patterns/wood-pattern.png'), #c19a6b;
-      background-size: cover;
-      border: 1.5vmin solid #8b5a2b;
-      border-radius: 16px;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.3);
+      gap: 0.5vmin;
+      background: url('https://www.transparenttextures.com/patterns/wood-pattern.png'), #c69c6d;
+      border: 2vmin solid #7b5b3a;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
       position: relative;
       touch-action: none;
     }
 
     .piece {
-      background: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
-      background-color: #deb887;
+      background: url('https://www.transparenttextures.com/patterns/wood-pattern.png'), #deb887;
       border: 2px solid #5c4320;
-      border-radius: 12%;
+      border-radius: 10%;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 3vmin;
-      color: #2c1a00;
-      font-family: 'Noto Serif JP', 'serif';
       font-weight: bold;
+      color: #2d1b00;
+      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3), inset 2px 2px 4px rgba(255,255,255,0.2);
       user-select: none;
       touch-action: none;
-      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2), inset 2px 2px 4px rgba(255,255,255,0.4);
+      z-index: 2;
     }
 
     .玄関 {
       grid-column: 1 / span 6;
       grid-row: 6 / span 2;
-      background: linear-gradient(to bottom, #e6d8b3, #d4c29e);
-      color: #4b382a;
-      font-size: 2.8vmin;
-      font-family: 'Noto Serif JP', serif;
-      font-weight: bold;
+      background: linear-gradient(to bottom, #e9dfc5, #d4c29e);
       display: flex;
-      align-items: center;
       justify-content: center;
-      border-top: 3px solid #8b5a2b;
-      box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-      border-radius: 0 0 8px 8px;
+      align-items: center;
+      font-size: 2.8vmin;
+      font-weight: bold;
+      color: #2c1a00;
+      border-top: 5px solid #8b5a2b;
+      border-radius: 0 0 10px 10px;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
     }
 
     .barrier {
@@ -75,15 +73,14 @@
       height: 1.5vmin;
       background: #8b5a2b;
       border-radius: 0.5vmin;
-      box-shadow: inset -1px -1px 2px rgba(0,0,0,0.2), inset 1px 1px 2px rgba(255,255,255,0.3);
       z-index: 3;
+      box-shadow: inset -1px -1px 2px rgba(0,0,0,0.2), inset 1px 1px 2px rgba(255,255,255,0.3);
     }
 
     #goal {
-      margin: 1rem;
-      font-weight: bold;
       font-size: 4vw;
       color: #b53a3a;
+      margin: 1rem;
     }
 
     #resetBtn {
@@ -93,12 +90,38 @@
       background: #f2e8dc;
       border: 2px solid #8c6f5a;
       border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
       cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    #resetBtn:hover {
-      background-color: #e8d8c0;
+    #celebration {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.8);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeOut 3s ease 2s forwards;
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    .musume-escape {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%) scale(0.8);
+      animation: musumeJump 2s ease-out forwards;
+    }
+
+    @keyframes musumeJump {
+      0%   { transform: translateX(-50%) translateY(0) scale(0.8); opacity: 0; }
+      20%  { opacity: 1; }
+      50%  { transform: translateX(-50%) translateY(-10vmin) scale(1); }
+      100% { transform: translateX(-50%) translateY(0) scale(1); }
     }
   </style>
 </head>
@@ -193,10 +216,7 @@
           const nx = p.x + i + dx;
           const ny = p.y + j + dy;
 
-          if (dy > 0) {
-            if (ny === 5 && !(p.x + i === 2 || p.x + i === 3)) return;
-          }
-
+          if (dy > 0 && ny === 5 && !(p.x + i === 2 || p.x + i === 3)) return;
           if (nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight || isOccupied(nx, ny, p.id)) return;
         }
       }
@@ -211,24 +231,41 @@
       const yThreshold = 5;
       for (const p of pieces) {
         if (p.y + p.h - 1 >= yThreshold && p.id !== "娘") {
-          goal.textContent = "🚫 ルール違反：娘以外が玄関に入りました。";
+          goal.textContent = "🚫 娘以外が玄関に入りました。";
           resetBtn.style.display = "inline-block";
           return;
         }
       }
       const musume = pieces.find(p => p.id === "娘");
       if (musume.y >= yThreshold) {
-        goal.textContent = "🎉 娘が玄関に到達しました！";
+        goal.textContent = "🎊 娘が玄関に出ました！";
+        triggerCelebration();
       } else {
         goal.textContent = "";
         resetBtn.style.display = "none";
       }
     }
 
+    function triggerCelebration() {
+      const overlay = document.createElement('div');
+      overlay.id = 'celebration';
+
+      const musumeImg = document.createElement('img');
+      musumeImg.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Utagawa_Kunisada_-_Courtesan_on_Veranda.jpg/300px-Utagawa_Kunisada_-_Courtesan_on_Veranda.jpg';
+      musumeImg.alt = '娘の喜び';
+      musumeImg.className = 'musume-escape';
+      overlay.appendChild(musumeImg);
+
+      document.body.appendChild(overlay);
+      resetBtn.style.display = 'inline-block';
+    }
+
     function resetGame() {
       pieces = initPieces();
       goal.textContent = "";
       resetBtn.style.display = "none";
+      const existing = document.getElementById('celebration');
+      if (existing) existing.remove();
       drawBoard();
     }
 
