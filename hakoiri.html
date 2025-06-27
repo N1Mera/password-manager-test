@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（玄関仕切り対応）</title>
+  <title>箱入り娘（表示修正最終版）</title>
   <style>
-    body { font-family: sans-serif; text-align: center; }
+    body { font-family: sans-serif; text-align: center; margin: 0; }
     #board {
       position: relative;
       display: grid;
       grid-template-columns: repeat(6, 50px);
-      grid-template-rows: repeat(8, 50px);
+      grid-template-rows: repeat(7, 50px); /* ← 8→7行に */
       gap: 1px;
       margin: 10px auto;
       background-color: #ccc;
       touch-action: none;
+      width: 301px; /* 6×50 + 5×1px gap = 300 + 5 = 305 */
+      height: 352px; /* 7×50 + 6×1px gap = 350 + 6 = 356 */
     }
     .piece {
       background: #fce5cd;
@@ -32,11 +34,9 @@
     .玄関 {
       background: #d9ead3;
       grid-column: 1 / span 6;
-      grid-row: 7 / span 2;
+      grid-row: 7 / span 1;
       z-index: 1;
-      border-top: 2px dashed #666;
       font-size: 13px;
-      text-align: center;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -48,18 +48,27 @@
       z-index: 3;
     }
     #goal {
-      margin-top: 10px;
+      margin: 10px 0;
       font-weight: bold;
+    }
+    #resetBtn {
+      display: none;
+      padding: 6px 12px;
+      font-size: 14px;
+      background: #f4cccc;
+      border: 1px solid #999;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <h1>箱入り娘（6×8・玄関仕切り対応）</h1>
+  <h1>箱入り娘（表示調整済）</h1>
   <div id="board"></div>
   <div id="goal"></div>
+  <button id="resetBtn" onclick="resetGame()">もう一度やり直す</button>
 
   <script>
-    const boardWidth = 6, boardHeight = 8;
+    const boardWidth = 6, boardHeight = 7;
     let touchStartX = 0, touchStartY = 0;
     let pieces, initialPieces;
 
@@ -85,13 +94,11 @@
     function drawBoard() {
       board.innerHTML = "";
 
-      // 玄関ゾーン
       const genkan = document.createElement("div");
       genkan.className = "玄関";
       genkan.textContent = "玄関";
       board.appendChild(genkan);
 
-      // 玄関仕切り線（x=0,1,4,5）
       const barrierXs = [0, 1, 4, 5];
       for (const x of barrierXs) {
         const line = document.createElement("div");
@@ -145,15 +152,11 @@
           const nx = p.x + i + dx;
           const ny = p.y + j + dy;
 
-          // 🔒 仕切り制限：玄関に入れるのはx=2,3のみ
           if (dy > 0 && ny === 6 && !(p.x + i === 2 || p.x + i === 3)) {
             return;
           }
-
-          if (
-            nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight ||
-            isOccupied(nx, ny, p.id)
-          ) {
+          if (nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight ||
+              isOccupied(nx, ny, p.id)) {
             return;
           }
         }
@@ -162,16 +165,15 @@
       p.x += dx;
       p.y += dy;
       drawBoard();
-      checkWinOrViolation();
+      setTimeout(checkWinOrViolation, 10); // 描画後にチェック
     }
 
     function checkWinOrViolation() {
       const yThreshold = 6;
       for (const p of pieces) {
         if (p.y + p.h - 1 >= yThreshold && p.id !== "娘") {
-          goal.textContent = "🚫 ルール違反：玄関に娘以外が侵入しました。初期状態に戻します。";
-          pieces = initPieces();
-          drawBoard();
+          goal.textContent = "🚫 ルール違反：娘以外が玄関に入りました。";
+          resetBtn.style.display = "inline-block";
           return;
         }
       }
@@ -181,7 +183,15 @@
         goal.textContent = "🎉 娘が玄関に到達しました！";
       } else {
         goal.textContent = "";
+        resetBtn.style.display = "none";
       }
+    }
+
+    function resetGame() {
+      pieces = initPieces();
+      goal.textContent = "";
+      resetBtn.style.display = "none";
+      drawBoard();
     }
 
     // 初期化
