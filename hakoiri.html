@@ -2,140 +2,142 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>娘を玄関へ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>箱入り娘の大家族（スワイプ対応）</title>
   <style>
-    body { font-family: sans-serif; }
-    .board {
+    body { text-align: center; font-family: sans-serif; }
+    h1 { font-size: 1.2em; }
+    #board {
       display: grid;
-      grid-template-columns: repeat(6, 60px);
-      grid-template-rows: repeat(8, 60px);
+      grid-template-columns: repeat(4, 80px);
+      grid-template-rows: repeat(5, 80px);
       gap: 2px;
-      margin: 20px auto;
-      width: fit-content;
+      margin: 0 auto;
+      touch-action: none;
     }
-    .cell {
-      width: 60px;
-      height: 60px;
-      background: #eee;
+    .piece {
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid #999;
-      box-sizing: border-box;
+      font-size: 14px;
+      background-color: #ffe4b5;
+      border: 2px solid #555;
+      border-radius: 6px;
+      user-select: none;
+      position: relative;
+      transition: 0.2s ease;
     }
-    .block {
-      background: #ccc;
-      border: 2px solid #333;
-      cursor: move;
-      font-weight: bold;
-    }
-    #message {
-      text-align: center;
+    #goal {
       margin-top: 10px;
-      font-size: 18px;
+      color: green;
     }
   </style>
 </head>
 <body>
-  <div class="board" id="board"></div>
-  <div id="message"></div>
+  <h1>箱入り娘の大家族</h1>
+  <div id="board"></div>
+  <div id="goal"></div>
 
   <script>
-    const board = document.getElementById("board");
-    const cells = [];
-    const width = 6, height = 8;
+    const boardWidth = 4, boardHeight = 5;
+    let touchStartX = 0, touchStartY = 0;
 
-    // 初期化
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
+    const pieces = [
+      { id: "父",      x: 0, y: 0, w: 1, h: 2 },
+      { id: "娘",      x: 1, y: 0, w: 2, h: 2 },
+      { id: "母",      x: 3, y: 0, w: 1, h: 2 },
+      { id: "番頭",    x: 0, y: 2, w: 1, h: 1 },
+      { id: "大番頭",  x: 1, y: 2, w: 2, h: 1 },
+      { id: "女中",    x: 2, y: 2, w: 1, h: 1 },
+      { id: "兄嫁",    x: 3, y: 2, w: 1, h: 1 },
+      { id: "手代",    x: 0, y: 3, w: 1, h: 1 },
+      { id: "祖父",    x: 1, y: 3, w: 1, h: 1 },
+      { id: "祖母",    x: 2, y: 3, w: 1, h: 1 },
+      { id: "番犬",    x: 3, y: 4, w: 1, h: 1 },
+      { id: "でっち1", x: 0, y: 4, w: 1, h: 1 },
+      { id: "でっち2", x: 1, y: 4, w: 1, h: 1 }
+    ];
+
+    const board = document.getElementById("board");
+    const goal = document.getElementById("goal");
+
+    function drawBoard() {
+      board.innerHTML = "";
+      for (const p of pieces) {
         const div = document.createElement("div");
-        div.className = "cell";
-        div.dataset.x = x;
-        div.dataset.y = y;
+        div.className = "piece";
+        div.textContent = p.id.replace(/\d/, '');
+        div.style.gridColumn = `${p.x + 1} / span ${p.w}`;
+        div.style.gridRow = `${p.y + 1} / span ${p.h}`;
+        div.dataset.id = p.id;
+
+        div.addEventListener("touchstart", e => {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        div.addEventListener("touchend", e => {
+          const dx = e.changedTouches[0].clientX - touchStartX;
+          const dy = e.changedTouches[0].clientY - touchStartY;
+          const absX = Math.abs(dx), absY = Math.abs(dy);
+
+          if (Math.max(absX, absY) < 20) return; // スワイプ閾値
+
+          let dir = null;
+          if (absX > absY) dir = dx > 0 ? "right" : "left";
+          else            dir = dy > 0 ? "down" : "up";
+
+          tryMove(p.id, dir);
+        });
+
         board.appendChild(div);
-        cells.push(div);
       }
     }
 
-    // ブロック定義
-    const blocks = {
-      "父": { pos: [[1, 2], [2, 2]] },
-      "娘": { pos: [[1, 3], [2, 3], [1, 4], [2, 4]] },
-      "母": { pos: [[1, 5], [2, 5]] },
-      "手代": { pos: [[0, 3]] },
-      "大番頭": { pos: [[1, 5], [2, 5], [3, 5], [4, 5]] },
-      "兄弟": { pos: [[5, 5]] },
-      "丁稚1": { pos: [[0, 4]] },
-      "番頭": { pos: [[1, 4], [2, 4]] },
-      "女中": { pos: [[3, 4], [4, 4]] },
-      "丁稚2": { pos: [[5, 4]] },
-      "丁稚3": { pos: [[0, 5]] },
-      "祖父": { pos: [[1, 6], [2, 6]] },
-      "祖母": { pos: [[3, 6], [4, 6]] },
-      "番犬": { pos: [[5, 6], [5, 7]] },
-    };
-
-    // 玄関領域
-    function isGoal(x, y) {
-      return (y >= 6 && (x === 4 || x === 5));
-    }
-
-    // ブロック配置
-    const positions = {};
-    for (const [name, data] of Object.entries(blocks)) {
-      const div = document.createElement("div");
-      div.className = "block";
-      div.innerText = name;
-      div.style.position = "absolute";
-      div.dataset.name = name;
-      board.appendChild(div);
-      data.el = div;
-      updateBlockPosition(name);
-
-      div.draggable = true;
-      div.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("text/plain", name);
+    function isOccupied(x, y, ignoreId = null) {
+      return pieces.some(p => {
+        if (p.id === ignoreId) return false;
+        return x >= p.x && x < p.x + p.w && y >= p.y && y < p.y + p.h;
       });
     }
 
-    board.addEventListener("dragover", e => e.preventDefault());
-    board.addEventListener("drop", e => {
-      const name = e.dataTransfer.getData("text/plain");
-      const block = blocks[name];
-      const rect = board.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / 62);
-      const y = Math.floor((e.clientY - rect.top) / 62);
-      const dx = x - block.pos[0][0];
-      const dy = y - block.pos[0][1];
-      const newPos = block.pos.map(([px, py]) => [px + dx, py + dy]);
+    function tryMove(id, direction) {
+      const p = pieces.find(p => p.id === id);
+      let dx = 0, dy = 0;
+      if (direction === "up") dy = -1;
+      if (direction === "down") dy = 1;
+      if (direction === "left") dx = -1;
+      if (direction === "right") dx = 1;
 
-      if (newPos.every(([nx, ny]) =>
-        nx >= 0 && nx < width && ny >= 0 && ny < height &&
-        !Object.values(blocks).some(b => b !== block && b.pos.some(([bx, by]) => bx === nx && by === ny))
-      )) {
-        block.pos = newPos;
-        updateBlockPosition(name);
-        checkGoal();
+      for (let i = 0; i < p.w; i++) {
+        for (let j = 0; j < p.h; j++) {
+          const nx = p.x + i + dx;
+          const ny = p.y + j + dy;
+          if (
+            nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight ||
+            isOccupied(nx, ny, p.id)
+          ) {
+            return;
+          }
+        }
       }
-    });
 
-    function updateBlockPosition(name) {
-      const block = blocks[name];
-      const [x0, y0] = block.pos[0];
-      const x1 = Math.max(...block.pos.map(p => p[0]));
-      const y1 = Math.max(...block.pos.map(p => p[1]));
-      block.el.style.left = `${x0 * 62}px`;
-      block.el.style.top = `${y0 * 62}px`;
-      block.el.style.width = `${(x1 - x0 + 1) * 60 + (x1 - x0) * 2}px`;
-      block.el.style.height = `${(y1 - y0 + 1) * 60 + (y1 - y0) * 2}px`;
+      p.x += dx;
+      p.y += dy;
+      drawBoard();
+      checkWin();
     }
 
-    function checkGoal() {
-      const daughter = blocks["娘"];
-      if (daughter.pos.some(([x, y]) => isGoal(x, y))) {
-        document.getElementById("message").innerText = "クリア！娘が玄関に到達しました。";
+    function checkWin() {
+      const musume = pieces.find(p => p.id === "娘");
+      if (musume.x === 1 && musume.y === 3) {
+        goal.textContent = "🎉 娘が玄関に出られました！";
+      } else {
+        goal.textContent = "";
       }
     }
+
+    drawBoard();
   </script>
 </body>
 </html>
