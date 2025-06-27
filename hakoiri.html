@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（6×8調整版）</title>
+  <title>箱入り娘（6×8・玄関付き）</title>
   <style>
     body { font-family: sans-serif; text-align: center; }
     h1 { font-size: 1.2em; }
@@ -28,6 +28,17 @@
       user-select: none;
       touch-action: none;
       transition: all 0.2s ease;
+      z-index: 2;
+    }
+    .玄関 {
+      background: #d9ead3;
+      grid-column: 1 / span 6;
+      grid-row: 7 / span 2;
+      z-index: 1;
+      border-top: 2px dashed #666;
+      font-size: 12px;
+      text-align: center;
+      padding-top: 5px;
     }
     #goal {
       margin-top: 10px;
@@ -36,7 +47,7 @@
   </style>
 </head>
 <body>
-  <h1>箱入り娘（6×8）</h1>
+  <h1>箱入り娘（6×8・玄関付き）</h1>
   <div id="board"></div>
   <div id="goal"></div>
 
@@ -46,19 +57,20 @@
     let touchStartX = 0, touchStartY = 0;
 
     const pieces = [
-      { id: "父",      x: 0, y: 0, w: 1, h: 2 },
-      { id: "母",      x: 5, y: 0, w: 1, h: 2 },
-      { id: "娘",      x: 2, y: 0, w: 2, h: 2 },
-      { id: "大番頭",  x: 0, y: 2, w: 1, h: 4 },
-      { id: "番頭",    x: 1, y: 2, w: 2, h: 1 },
-      { id: "女中",    x: 3, y: 2, w: 2, h: 1 },
-      { id: "祖父",    x: 1, y: 3, w: 2, h: 1 },
-      { id: "祖母",    x: 3, y: 3, w: 2, h: 1 },
-      { id: "兄嫁",    x: 2, y: 4, w: 1, h: 1 },
-      { id: "手代",    x: 3, y: 4, w: 1, h: 1 },
-      { id: "でっち1", x: 4, y: 5, w: 1, h: 1 },
-      { id: "でっち2", x: 1, y: 5, w: 1, h: 1 },
-      { id: "番犬",    x: 2, y: 6, w: 1, h: 1 }
+      { id: "父",     x: 1, y: 0, w: 1, h: 2 },
+      { id: "母",     x: 4, y: 0, w: 1, h: 2 },
+      { id: "娘",     x: 2, y: 0, w: 2, h: 2 },
+      { id: "大番頭", x: 1, y: 2, w: 4, h: 1 }, // 横長に変更
+      { id: "番頭",   x: 1, y: 3, w: 2, h: 1 },
+      { id: "女中",   x: 3, y: 3, w: 2, h: 1 },
+      { id: "祖父",   x: 1, y: 4, w: 2, h: 1 },
+      { id: "祖母",   x: 3, y: 4, w: 2, h: 1 },
+      { id: "手代",   x: 0, y: 2, w: 1, h: 1 },
+      { id: "丁稚",   x: 0, y: 3, w: 1, h: 1 },
+      { id: "丁稚",   x: 5, y: 3, w: 1, h: 1 },
+      { id: "兄嫁",   x: 5, y: 2, w: 1, h: 1 },
+      { id: "番犬",   x: 5, y: 4, w: 1, h: 1 },
+      { id: "丁稚",   x: 0, y: 4, w: 1, h: 1 }
     ];
 
     const board = document.getElementById("board");
@@ -66,6 +78,13 @@
 
     function drawBoard() {
       board.innerHTML = "";
+
+      // 玄関ゾーン
+      const genkan = document.createElement("div");
+      genkan.className = "玄関";
+      genkan.textContent = "⬇️ ここが玄関です（娘をここに）";
+      board.appendChild(genkan);
+
       for (const p of pieces) {
         const div = document.createElement("div");
         div.className = "piece";
@@ -84,7 +103,7 @@
           const dy = e.changedTouches[0].clientY - touchStartY;
           const absX = Math.abs(dx), absY = Math.abs(dy);
           if (Math.max(absX, absY) < 15) return;
-          let dir = absX > absY ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+          const dir = absX > absY ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
           tryMove(p.id, dir);
         });
 
@@ -122,8 +141,8 @@
 
     function checkWin() {
       const musume = pieces.find(p => p.id === "娘");
-      if (musume.y === 6 && musume.x === 2) {
-        goal.textContent = "🎉 娘が玄関に出ました！";
+      if (musume.y >= 6) {
+        goal.textContent = "🎉 娘が玄関に到達しました！";
       } else {
         goal.textContent = "";
       }
@@ -133,4 +152,3 @@
   </script>
 </body>
 </html>
-
