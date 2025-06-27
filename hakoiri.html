@@ -78,9 +78,16 @@
     }
 
     #goal {
-      font-size: 4vw;
-      color: #b53a3a;
-      margin: 1rem;
+      font-size: 5vw;
+      color: #a02929;
+      font-weight: bold;
+      margin: 1.5rem 0;
+      animation: bounce 1s ease-in-out 2;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
     }
 
     #resetBtn {
@@ -92,36 +99,6 @@
       border-radius: 6px;
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    #celebration {
-      position: fixed;
-      inset: 0;
-      background: rgba(255,255,255,0.8);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: fadeOut 3s ease 2s forwards;
-    }
-
-    @keyframes fadeOut {
-      to { opacity: 0; visibility: hidden; }
-    }
-
-    .musume-escape {
-      position: absolute;
-      bottom: 10%;
-      left: 50%;
-      transform: translateX(-50%) scale(0.8);
-      animation: musumeJump 2s ease-out forwards;
-    }
-
-    @keyframes musumeJump {
-      0%   { transform: translateX(-50%) translateY(0) scale(0.8); opacity: 0; }
-      20%  { opacity: 1; }
-      50%  { transform: translateX(-50%) translateY(-10vmin) scale(1); }
-      100% { transform: translateX(-50%) translateY(0) scale(1); }
     }
   </style>
 </head>
@@ -238,34 +215,18 @@
       }
       const musume = pieces.find(p => p.id === "娘");
       if (musume.y >= yThreshold) {
-        goal.textContent = "🎊 娘が玄関に出ました！";
-        triggerCelebration();
+        goal.textContent = "🎊 娘が玄関に出ました！めでたしめでたし！";
+        resetBtn.style.display = "inline-block";
       } else {
         goal.textContent = "";
         resetBtn.style.display = "none";
       }
     }
 
-    function triggerCelebration() {
-      const overlay = document.createElement('div');
-      overlay.id = 'celebration';
-
-      const musumeImg = document.createElement('img');
-      musumeImg.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Utagawa_Kunisada_-_Courtesan_on_Veranda.jpg/300px-Utagawa_Kunisada_-_Courtesan_on_Veranda.jpg';
-      musumeImg.alt = '娘の喜び';
-      musumeImg.className = 'musume-escape';
-      overlay.appendChild(musumeImg);
-
-      document.body.appendChild(overlay);
-      resetBtn.style.display = 'inline-block';
-    }
-
     function resetGame() {
       pieces = initPieces();
       goal.textContent = "";
       resetBtn.style.display = "none";
-      const existing = document.getElementById('celebration');
-      if (existing) existing.remove();
       drawBoard();
     }
 
