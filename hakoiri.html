@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（玄関ルール強化）</title>
+  <title>箱入り娘（玄関仕切り対応）</title>
   <style>
     body { font-family: sans-serif; text-align: center; }
     #board {
+      position: relative;
       display: grid;
       grid-template-columns: repeat(6, 50px);
       grid-template-rows: repeat(8, 50px);
       gap: 1px;
       margin: 10px auto;
       background-color: #ccc;
-      position: relative;
       touch-action: none;
     }
     .piece {
@@ -41,6 +41,12 @@
       align-items: center;
       justify-content: center;
     }
+    .barrier {
+      position: absolute;
+      height: 2px;
+      background-color: #999;
+      z-index: 3;
+    }
     #goal {
       margin-top: 10px;
       font-weight: bold;
@@ -48,7 +54,7 @@
   </style>
 </head>
 <body>
-  <h1>箱入り娘（6×8・玄関ルール強化）</h1>
+  <h1>箱入り娘（6×8・玄関仕切り対応）</h1>
   <div id="board"></div>
   <div id="goal"></div>
 
@@ -84,6 +90,17 @@
       genkan.className = "玄関";
       genkan.textContent = "玄関";
       board.appendChild(genkan);
+
+      // 玄関仕切り線（x=0,1,4,5）
+      const barrierXs = [0, 1, 4, 5];
+      for (const x of barrierXs) {
+        const line = document.createElement("div");
+        line.className = "barrier";
+        line.style.left = `${x * 50}px`;
+        line.style.top = `${6 * 50}px`;
+        line.style.width = "50px";
+        board.appendChild(line);
+      }
 
       for (const p of pieces) {
         const div = document.createElement("div");
@@ -129,10 +146,8 @@
           const ny = p.y + j + dy;
 
           // 🔒 仕切り制限：玄関に入れるのはx=2,3のみ
-          if (
-            dy > 0 && ny === 6 && !(p.x + i === 2 || p.x + i === 3)
-          ) {
-            return; // 中央以外から玄関に入ろうとした → 禁止
+          if (dy > 0 && ny === 6 && !(p.x + i === 2 || p.x + i === 3)) {
+            return;
           }
 
           if (
