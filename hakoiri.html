@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>箱入り娘（玄関2マス・仕切り修正）</title>
+  <title>箱入り娘（玄関表示修正済）</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin: 0; }
     #board {
       position: relative;
       display: grid;
       grid-template-columns: repeat(6, 50px);
-      grid-template-rows: repeat(6, 50px); /* 6段に縮小 */
+      grid-template-rows: repeat(7, 50px); /* ← 7行に修正 */
       gap: 1px;
       margin: 10px auto;
       background-color: #ccc;
       touch-action: none;
-      width: 301px; /* 6列 * 50px + gap = 300 + 5 */
-      height: 301px; /* 6段 * 50px + gap = 300 + 5 */
+      width: 301px;
+      height: 352px; /* ← 7×50 + 6 gaps */
     }
     .piece {
       background: #fce5cd;
@@ -34,7 +34,7 @@
     .玄関 {
       background: #d9ead3;
       grid-column: 1 / span 6;
-      grid-row: 5 / span 2; /* y=5,6を玄関に */
+      grid-row: 6 / span 2; /* ← y=5,6 */
       z-index: 1;
       font-size: 13px;
       display: flex;
@@ -62,15 +62,15 @@
   </style>
 </head>
 <body>
-  <h1>箱入り娘（玄関2マス対応）</h1>
+  <h1>箱入り娘（玄関表示修正済）</h1>
   <div id="board"></div>
   <div id="goal"></div>
   <button id="resetBtn" onclick="resetGame()">もう一度やり直す</button>
 
   <script>
-    const boardWidth = 6, boardHeight = 6;
+    const boardWidth = 6, boardHeight = 7;
     let touchStartX = 0, touchStartY = 0;
-    let pieces, initialPieces;
+    let pieces;
 
     function initPieces() {
       return JSON.parse(JSON.stringify([
@@ -94,19 +94,17 @@
     function drawBoard() {
       board.innerHTML = "";
 
-      // 玄関ゾーン
       const genkan = document.createElement("div");
       genkan.className = "玄関";
       genkan.textContent = "玄関";
       board.appendChild(genkan);
 
-      // 玄関の仕切り線（y=4と5の間）
       const barrierXs = [0, 1, 4, 5];
       for (const x of barrierXs) {
         const line = document.createElement("div");
         line.className = "barrier";
         line.style.left = `${x * 50}px`;
-        line.style.top = `${5 * 50}px`;
+        line.style.top = `${5 * 50}px`; // y=5の上
         line.style.width = "50px";
         board.appendChild(line);
       }
@@ -154,20 +152,15 @@
           const nx = p.x + i + dx;
           const ny = p.y + j + dy;
 
-          if (dy > 0 && ny === 5 && !(p.x + i === 2 || p.x + i === 3)) {
-            return;
-          }
-          if (nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight ||
-              isOccupied(nx, ny, p.id)) {
-            return;
-          }
+          if (dy > 0 && ny === 5 && !(p.x + i === 2 || p.x + i === 3)) return;
+          if (nx < 0 || nx >= boardWidth || ny < 0 || ny >= boardHeight || isOccupied(nx, ny, p.id)) return;
         }
       }
 
       p.x += dx;
       p.y += dy;
       drawBoard();
-      setTimeout(checkWinOrViolation, 10); // 描画反映後に検査
+      setTimeout(checkWinOrViolation, 10);
     }
 
     function checkWinOrViolation() {
@@ -179,7 +172,6 @@
           return;
         }
       }
-
       const musume = pieces.find(p => p.id === "娘");
       if (musume.y >= yThreshold) {
         goal.textContent = "🎉 娘が玄関に到達しました！";
@@ -196,7 +188,6 @@
       drawBoard();
     }
 
-    // 初期化
     pieces = initPieces();
     drawBoard();
   </script>
